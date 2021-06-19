@@ -61,39 +61,37 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
         int block_row = min(SIZE, num_output-i);
         int block_col_1 = min(SIZE, num_input-j);
         int block_col_2 = min(SIZE, num_matrix2-k);
-		for(int n = 0; n < SIZE; ++n)
-		{
-			for(int m = 0; m < SIZE; ++m)
-			{
-				m1[n*SIZE + m] = 0;
-				m2[n*SIZE + m] = 0;
-			}
-		}
 
+        for(int k1 = 0; k1 < SIZE; ++k1){
+          for(int k2 = 0; k2 < SIZE; ++k2){
+              m1[k1*SIZE + k2] = 0;
+              m2[k1*SIZE + k2] = 0;
+          }
+        }
         // 1) Assign a m1
-        // IMPLEMENT THIS
-		for(int n = 0; n < block_row; ++n)
-		{
-			for(int m = 0; m < block_col_1; ++m)
-			{
-				m1[n*SIZE + m] = weight_mat[(i + n)*num_input + (j + m)];
-			}
-		}
+        printf("\tAssigning m1 for %d, %d, %d\n", i, j, k);
+        for(int k1 = 0; k1 < block_row; ++k1)
+          for(int k2 = 0; k2 < block_col_1; ++k2)
+            m1[k1 * SIZE + k2] = weight_mat[(i + k1) * num_input + j + k2];
 
         // 2) Assign a m2
-        // IMPLEMENT THIS
-		for(int n = 0; n < block_col_1; ++n)
-		{
-			for(int m = 0; m < block_col_2; ++m)
-			{
-				m2[n*SIZE + m] = input_mat[(j + n)*num_matrix2 + (k + m)];
-			}
-		}
+        for(int k1 = 0; k1 < block_col_1; ++k1)
+          for(int k2 = 0; k2 < block_col_2; ++k2)
+            m2[k1 * SIZE + k2] = input_mat[(j + k1) * num_matrix2 + k + k2];
+
+        // 3) Call a function `blockMM() to execute Matrix matrix multiplication
+        printf("Call blockMM\n");
+        const float* ret = this->run();
+
+
+
 		// 3) Call a function `blockMM() to execute Matrix matrix multiplication
 		const float* rst = this->run();
 
     // 4) Accumulate intermediate results
     // It is slightly different from the code for the project.
+            printf("accmulating");
+
 		for(int n = 0; n<block_row; ++n)
         {
           for(int m = 0; m<block_col_2; ++m)
@@ -101,7 +99,8 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
             output[n*SIZE + m] += rst[n*SIZE + m];
           }
         }
-		// 4) Accumulate intermediate results
+        // 4) Accumulate intermediate results
+        printf("\tk: %d finished\n", k);
  	  } 
 	}
   }
