@@ -57,40 +57,43 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
     {			
       for(int k = 0; k < num_matrix2; k += SIZE)
       {
-         // 0) Initialize input vector
+        // 0) Initialize input vector
         int block_row = min(SIZE, num_output-i);
         int block_col_1 = min(SIZE, num_input-j);
         int block_col_2 = min(SIZE, num_matrix2-k);
+		for(int n = 0; n < SIZE; ++n)
+		{
+			for(int m = 0; m < SIZE; ++m)
+			{
+				m1[n*SIZE + m] = 0;
+				m2[n*SIZE + m] = 0;
+			}
+		}
 
         // 1) Assign a m1
-        // Implement This
-        printf("\tAssigning m1 for %d, %d, %d\n", i, j, k);
-        memset(m1, 0, SIZE * SIZE * sizeof(float));
-
-        for(int m=0; m<block_row; m++){ 
-          printf("\tmemcpy %d\n", m);
-          memcpy(m1 + m*SIZE, weight_mat + (i+m)*num_input + j, block_col_1 * sizeof(float));
-        }
+        // IMPLEMENT THIS
+		for(int n = 0; n < block_row; ++n)
+		{
+			for(int m = 0; m < block_col_1; ++m)
+			{
+				m1[n*SIZE + m] = weight_mat[(i + n)*num_input + (j + m)];
+			}
+		}
 
         // 2) Assign a m2
         // IMPLEMENT THIS
-        printf("\n\tAssigning m2 for %d, %d, %d\n", i, j, k);
-        memset(m2, 0, SIZE * SIZE *sizeof(float));
-
-        for(int n=0; n<block_col_1; n++){
-          printf("\tmemcpy %d\n", n);
-          memcpy(m2 + n*SIZE, input_mat + (j+n)*num_matrix2 + k, block_col_2 * sizeof(float));
-        }
-
+		for(int n = 0; n < block_col_1; ++n)
+		{
+			for(int m = 0; m < block_col_2; ++m)
+			{
+				m2[n*SIZE + m] = input_mat[(j + n)*num_matrix2 + (k + m)];
+			}
+		}
 		// 3) Call a function `blockMM() to execute Matrix matrix multiplication
-    printf("Calling function blockMM\n");
-
 		const float* rst = this->run();
 
     // 4) Accumulate intermediate results
     // It is slightly different from the code for the project.
-        printf("Accumulating\n");
-
 		for(int n = 0; n<block_row; ++n)
         {
           for(int m = 0; m<block_col_2; ++m)
@@ -99,8 +102,6 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
           }
         }
 		// 4) Accumulate intermediate results
-        printf("\tk: %d finished\n", k);
-
  	  } 
 	}
   }
