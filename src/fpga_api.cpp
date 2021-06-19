@@ -57,40 +57,39 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
     {			
       for(int k = 0; k < num_matrix2; k += SIZE)
       {
-        // 0) Initialize input vector
+         // 0) Initialize input vector
         int block_row = min(SIZE, num_output-i);
         int block_col_1 = min(SIZE, num_input-j);
         int block_col_2 = min(SIZE, num_matrix2-k);
 
-        for(int k1 = 0; k1 < SIZE; ++k1){
-          for(int k2 = 0; k2 < SIZE; ++k2){
-              m1[k1*SIZE + k2] = 0;
-              m2[k1*SIZE + k2] = 0;
-          }
-        }
         // 1) Assign a m1
+        // Implement This
         printf("\tAssigning m1 for %d, %d, %d\n", i, j, k);
-        for(int k1 = 0; k1 < block_row; ++k1)
-          for(int k2 = 0; k2 < block_col_1; ++k2)
-            m1[k1 * SIZE + k2] = weight_mat[(i + k1) * num_input + j + k2];
+        memset(m1, 0, SIZE * SIZE * sizeof(float));
+
+        for(int m=0; m<block_row; m++){ 
+          printf("\tmemcpy %d\n", m);
+          memcpy(m1 + m*SIZE, weight_mat + (i+m)*num_input + j, block_col_1 * sizeof(float));
+        }
 
         // 2) Assign a m2
-        for(int k1 = 0; k1 < block_col_1; ++k1)
-          for(int k2 = 0; k2 < block_col_2; ++k2)
-            m2[k1 * SIZE + k2] = input_mat[(j + k1) * num_matrix2 + k + k2];
+        // IMPLEMENT THIS
+        printf("\n\tAssigning m2 for %d, %d, %d\n", i, j, k);
+        memset(m2, 0, SIZE * SIZE *sizeof(float));
 
-        // 3) Call a function `blockMM() to execute Matrix matrix multiplication
-        printf("Calling function blockMM\n");
-        const float* ret = this->run();
-
-
+        for(int n=0; n<block_col_1; n++){
+          printf("\tmemcpy %d\n", n);
+          memcpy(m2 + n*SIZE, input_mat + (j+n)*num_matrix2 + k, block_col_2 * sizeof(float));
+        }
 
 		// 3) Call a function `blockMM() to execute Matrix matrix multiplication
+    printf("Calling function blockMM\n");
+
 		const float* rst = this->run();
 
     // 4) Accumulate intermediate results
     // It is slightly different from the code for the project.
-            printf("accmulating");
+        printf("Accumulating\n");
 
 		for(int n = 0; n<block_row; ++n)
         {
@@ -99,8 +98,9 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
             output[n*SIZE + m] += rst[n*SIZE + m];
           }
         }
-        // 4) Accumulate intermediate results
+		// 4) Accumulate intermediate results
         printf("\tk: %d finished\n", k);
+
  	  } 
 	}
   }
